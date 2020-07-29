@@ -1,72 +1,51 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
+	"flag"
 	"fmt"
-	"image/png"
 	"log"
-	"os"
-
-	"github.com/auyer/steganography"
+	"steganography_util/steg"
 )
-
-func checkError(err error) {
-	if err != nil {
-		log.Fatalln(err)
-	}
-}
-
-func Encode(imagePath, outputPath, message string) {
-
-	inFile, err := os.Open(imagePath)
-	checkError(err)
-
-	defer inFile.Close()
-
-	reader := bufio.NewReader(inFile)
-
-	img, err := png.Decode(reader)
-	checkError(err)
-
-	writer := new(bytes.Buffer)
-
-	err = steganography.Encode(writer, img, []byte(message))
-	checkError(err)
-
-	outFile, err := os.Create(outputPath)
-	checkError(err)
-
-	defer outFile.Close()
-
-	writer.WriteTo(outFile)
-
-	fmt.Printf("[*] Message writing to %s\n", outputPath)
-
-}
-
-func Decode(imagePath string) {
-
-	inFile, err := os.Open(imagePath)
-	checkError(err)
-	defer inFile.Close()
-
-	reader := bufio.NewReader(inFile)
-	img, err := png.Decode(reader)
-	checkError(err)
-
-	sizeOfMessage := steganography.GetMessageSizeFromImage(img)
-	message := steganography.Decode(sizeOfMessage, img)
-
-	fmt.Println(string(message))
-
-}
 
 func Example() {
 
-	Encode("test.png", "test_output.png", "This is a message")
-	Decode("test_output.png")
+	steg.Encode("test.png", "test_output.png", "This is a message")
+	fmt.Println(steg.Decode("test_output.png"))
 }
 
 func main() {
+	//steg.Encode("test_girl.png", "test_output.png", "test.txt")
+	//fmt.Println(steg.Decode("/home/musa/samples/test1.png"))
+
+	encodeFlag := flag.Bool("encode", false, "Set to true if want to encode image")
+	decodeFlag := flag.Bool("decode", false, "Set to true if want to decode image")
+	imagePath := flag.String("image_path", "", "input image path")
+	messageFilePath := flag.String("message_file_path", "", "input message path")
+
+	flag.Parse()
+
+	if *encodeFlag == false && *decodeFlag == false {
+		log.Fatalln("Usage:go run main.go -encode -image image_path -massage_file  message_file_path")
+	}
+
+	if *encodeFlag == true && *decodeFlag == true {
+		log.Fatalln("Usage:go run main.go -encode -image image_path -massage_file  message_file_path")
+	}
+
+	if *encodeFlag {
+
+		fmt.Println("Encoding")
+
+		if *imagePath == "" || *messageFilePath == "" {
+			log.Fatalln("Usage:go run main.go -encode -image image_path -massage_file  message_file_path")
+		}
+
+		outputPath := steg.GetOutputPath(*imagePath)
+		steg.Encode(*imagePath, outputPath, *messageFilePath)
+
+	} else if *decodeFlag {
+		fmt.Println("Decoding")
+		fmt.Println(steg.Decode(*imagePath))
+	}
+
 }
