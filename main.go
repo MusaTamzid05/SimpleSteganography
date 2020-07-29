@@ -14,8 +14,6 @@ func Example() {
 }
 
 func main() {
-	//steg.Encode("test_girl.png", "test_output.png", "test.txt")
-	//fmt.Println(steg.Decode("/home/musa/samples/test1.png"))
 
 	encodeFlag := flag.Bool("encode", false, "Set to true if want to encode image")
 	decodeFlag := flag.Bool("decode", false, "Set to true if want to decode image")
